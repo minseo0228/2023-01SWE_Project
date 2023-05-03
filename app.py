@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-
+app.secret_key = 'mysecretkey'
 client = MongoClient('localhost',27017)
 db = client['SWE']
 collection = db['user']
@@ -43,23 +43,22 @@ def login():
         id = request.form.get('id')
         pw = request.form.get('pw')
 
-    if id == '':
-        flash("ID를 입력해주세요")
-        return render_template("login.html")
-    elif pw == '':
-        flash("비밀번호를 입력해주세요")
-        return render_template("login.html")
-    
-    user = collection.find_one({'id':id})
-    if not user:
-        flash('회원정보가 없습니다.')
-        return redirect(url_for('login'))
-    
-    if not check_password_hash(user['pw'],pw):
-        flash('아이디와 비밀번호가 일치하지않습니다.')
-        return redirect(url_for('login'))
-    session['id'] = id
-    flash('로그인 성공!')
+        if id == '':
+            flash("ID를 입력해주세요")
+            return render_template("login.html")
+        elif pw == '':
+            flash("비밀번호를 입력해주세요")
+            return render_template("login.html")
+        user = collection.find_one({'id':id})
+        if not user:
+            flash('회원정보가 없습니다.')
+            return redirect(url_for('login'))
+        
+        if not check_password_hash(user['pw'],pw):
+            flash('아이디와 비밀번호가 일치하지않습니다.')
+            return redirect(url_for('login'))
+        session['id'] = id
+        flash('로그인 성공!')
     return render_template('login.html')
 
 @app.route('/logout')
